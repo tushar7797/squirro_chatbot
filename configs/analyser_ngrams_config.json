@@ -1,0 +1,78 @@
+{
+    "settings": {
+      "index": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+      },
+      "analysis": {
+        "tokenizer": {
+          "non_word_pattern_tokenizer": {
+            "type": "pattern",
+            "pattern": "\\W+",
+            "flags": "CASE_INSENSITIVE"
+          }
+        },
+        "filter": {
+          "english_stop": {
+            "type": "stop",
+            "stopwords": [
+              "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into", "is", "it", "no", "not", "of", "on", "or", "such", "that", "the", "their", "then", "there", "these", "they", "this", "to", "was", "will", "with",
+              "who", "what", "when", "where", "why", "how", "i", "stock", "can", "do", "my", "from", "does", "s"
+            ]
+          },
+          "english_stemmer": {
+            "type": "stemmer",
+            "language": "english"
+          },
+          "english_possessive_stemmer": {
+            "type": "stemmer",
+            "language": "possessive_english"
+          },
+          "shingle_filter": {
+            "type": "shingle",
+            "min_shingle_size": 2,
+            "max_shingle_size": 2
+          }
+        },
+        "analyzer": {
+          "english_custom": {
+            "tokenizer": "standard",
+            "filter": [
+              "english_possessive_stemmer",
+              "lowercase",
+              "english_stop",
+              "english_stemmer"
+            ]
+          },
+          "english_bigrams": {
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "english_stop",
+              "shingle_filter"
+            ]
+          }
+        }
+      }
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "id": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "text": {
+          "type": "text",
+          "analyzer": "english_custom",
+          "fields": {
+            "bigrams": {
+              "type": "text",
+              "analyzer": "english_bigrams"
+            }
+          }
+        }
+      }
+    }
+  }
+  
