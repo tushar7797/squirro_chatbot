@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "squirro_chatbot"
+version = "0.1.0"
+description = "A brief description of the squirro_chatbot package."
+authors = [
+    { name = "Tushar Goel", email = "tushargoel7797@gmail.com" },
+]
+readme = "README.md"
+keywords = ["chatbot", "elasticsearch", "flask"]
+
+dependencies = [
+    "flask>=1.1.2",
+    "elasticsearch>=7.0.0",
+]

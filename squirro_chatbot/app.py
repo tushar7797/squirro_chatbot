@@ -1,34 +1,48 @@
+"""Flask application for creating and searching an ElasticSearch based Index."""
 import hashlib
 import os
 from uuid import uuid4
 
-import config
 from elasticsearch import Elasticsearch
 from flask import Flask, jsonify, request
-from search_result import Document, SearchResult
+
+import squirro_chatbot.app_config as app_config
+from squirro_chatbot.search_result import Document, SearchResult
 
 app = Flask(__name__)
-app.config.from_object("config")
+app.config.from_object("app_config")
 
 
-def init_elasticsearch():
+def _init_elasticsearch():
+    """Initialize Python Elastic Search client."""
+
     es_username = os.getenv("ELASTICSEARCH_USERNAME", "elastic")
     es_password = os.getenv("ELASTICSEARCH_PASSWORD")
 
+    # verify_certs set to False for this toy project.
     es = Elasticsearch(
-        app.config["ELASTICSEARCH_URL"],
+        [app.config["ELASTICSEARCH_URL"]],
         http_auth=(es_username, es_password),
         use_ssl=True,
-        verify_certs=False,  # Reminder: Only set this to False for specific cases.
+        verify_certs=False,
     )
+
+    if not es.indices.exists(app.config["INDEX_NAME"]):
+        es.indices.create(app.config["INDEX_NAME"])
+
     return es
 
-
-es = init_elasticsearch()
+# Initialize the elastic search client.
+es = _init_elasticsearch()
 
 
 @app.route("/documents/", methods=["POST"])
 def create_document():
+    """Creates and indexes a document.
+    
+    Returns:
+        doc_id (str): Document ID of the given Document.
+    """
 
     if not request.json or "text" not in request.json:
         return jsonify(error="Bad request"), 400
@@ -43,7 +57,17 @@ def create_document():
 
 @app.route("/documents/<doc_id>", methods=["GET"])
 def get_document(doc_id):
+    """Retrieves the document corresponding to the given doc id.
+    
+    Args:
+        doc_id (str): Document ID
+    
+    Returns:
+        text (str): Document text corresponding to the ID.
+    """
+
     res = es.get(index=app.config["INDEX_NAME"], id=doc_id)
+
     if res["found"]:
         return jsonify(text=res["_source"]["text"])
     else:
@@ -52,6 +76,13 @@ def get_document(doc_id):
 
 @app.route("/search/", methods=["GET"])
 def search_documents():
+    """Returns the top k corresponding documents for a given query.
+    
+    Returns:
+        results (List[Dict[str: str]]): List of relevant 
+            documents in the SearchResult format.
+    """
+
     query = request.args.get("query", "")
     top_k = int(request.args.get("top_k", app.config["DEFAULT_TOP_K"]))
     res = es.search(
