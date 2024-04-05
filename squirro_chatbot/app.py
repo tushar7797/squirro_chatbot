@@ -1,11 +1,11 @@
 """Flask application for creating and searching an ElasticSearch based Index."""
-
 import hashlib
 import os
 from uuid import uuid4
 
 from elasticsearch import Elasticsearch
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 import squirro_chatbot.app_config as app_config
 from squirro_chatbot.models.openai_chat_model import (
@@ -14,8 +14,10 @@ from squirro_chatbot.models.openai_chat_model import (
 )
 from squirro_chatbot.search_result import Document, SearchResult
 
+# Initialize Flask app and apply configurations
 app = Flask(__name__)
 app.config.from_object("app_config")
+CORS(app)
 
 
 def _init_elasticsearch():
@@ -42,11 +44,16 @@ def _init_elasticsearch():
 es = _init_elasticsearch()
 
 
-def __init_openai_chatbot():
+def __init_openai_chatbot() -> OpenAIChatModel:
+    """Initializes and returns an OpenAI Chat Model
+
+    Returns
+        openai_chat_model: Instance of OpenAI Chat model
+    """
     openai_chat_config = OpenAIChatModelConfig(
         chat_model=app.config["CHAT_MODEL"],
         max_tokens=app.config["MAX_TOKENS"],
-        generation_length_tokens=app.config["GENERATION_LENGTH"]
+        generation_length_tokens=app.config["GENERATION_LENGTH"],
     )
 
     openai_chat_model = OpenAIChatModel(openai_chat_config)
@@ -59,10 +66,13 @@ openai_chat_model = __init_openai_chatbot()
 
 @app.route("/documents/", methods=["POST"])
 def create_document():
-    """Creates and indexes a document.
+    """Endpoint for creating and indexing a new document.
 
-    Returns:
-        doc_id (str): Document ID of the given Document.
+    Expects a JSON payload with a "text" field. Document indexed
+    in Elastic Search Index with id set to SHA-256 hash of the text
+
+    Returns
+        A JSON response containing the document_id of the indexed document.
     """
 
     if not request.json or "text" not in request.json:
@@ -84,7 +94,8 @@ def get_document(doc_id):
         doc_id (str): Document ID
 
     Returns:
-        text (str): Document text corresponding to the ID.
+        A JSON response containing the `text` of the document if found,
+        otherwise an error message and a 404 status code.
     """
 
     res = es.get(index=app.config["INDEX_NAME"], id=doc_id)
@@ -95,9 +106,18 @@ def get_document(doc_id):
         return jsonify(error="Document not found"), 404
 
 
-def _retrieve_top_k_docs(query: str, top_k: int) -> str:
-    """ """
+def _retrieve_top_k_docs(query: str, top_k: int) -> list[SearchResult]:
+    """Retrieves the top k relevant documents for query.
+    
+    Args:
+        query: Query to be searched
+        top_k: Number of documents to be retrieved
 
+    Returns:
+        results: List of Most relevant docs.
+    """
+    
+    # Match the document with the query
     res = es.search(
         index=app.config["INDEX_NAME"],
         body={"query": {"match": {"text": query}}},
@@ -116,11 +136,15 @@ def _retrieve_top_k_docs(query: str, top_k: int) -> str:
 
 @app.route("/search/", methods=["GET"])
 def search_documents():
-    """Returns the top k corresponding documents for a given query.
+    """Retrieves top k documents matching a query.
+
+    Args:
+        query: The search query to match documents.
+        top_k: The number of top matching documents to retrieve.
 
     Returns:
-        results (List[Dict[str: str]]): List of relevant
-            documents in the SearchResult format.
+        JSON Response of list of SearchResult objects representing
+          the top k matching documents.
     """
 
     query = request.args.get("query", "")
@@ -133,7 +157,12 @@ def search_documents():
 
 @app.route("/generate_answer/", methods=["GET"])
 def generate_answer():
-
+    """Generate Open AI Chat model response to query.
+    
+    Returns:
+        JSON Response with generated answer and retrieved
+            document ids.
+    """
     query = request.args.get("query", "")
     top_k = app.config["DEFAULT_TOP_K"]
 
@@ -143,7 +172,10 @@ def generate_answer():
     prompt = f"Please Answer the query using the context provided. Query: {query}\nContext: {prompt_context}"
     answer = openai_chat_model.generate(prompt)
 
-    return jsonify(answer = answer)
+    retrieved_doc_ids = [result.document.id for result in relevant_docs]
+
+    return jsonify(answer=answer, retrieved_doc_ids=retrieved_doc_ids)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
