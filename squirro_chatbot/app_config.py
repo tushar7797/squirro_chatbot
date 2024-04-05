@@ -5,6 +5,7 @@ INDEX_NAME = "documents"
 # Default values for search
 DEFAULT_TOP_K = 5
 
-CHAT_MODEL = "gpt-3.5-turbo"
-MAX_TOKENS = 4096
-GENERATION_LENGTH = 256
+# OpenAI Chat model configuration
+OPENAI_CHAT_MODEL = "gpt-3.5-turbo"
+OPENAI_CHAT_MAX_TOKENS = 4096
+OPENAI_CHAT_GENERATION_LENGTH = 256

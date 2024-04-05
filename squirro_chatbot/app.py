@@ -60,9 +60,9 @@ def initialize_app():
 
     # Initialize the Open AI Chat Model.
     openai_chat_config = OpenAIChatModelConfig(
-        chat_model=app.config["CHAT_MODEL"],
-        max_tokens=app.config["MAX_TOKENS"],
-        generation_length_tokens=app.config["GENERATION_LENGTH"],
+        chat_model=app.config["OPENAI_CHAT_MODEL"],
+        max_tokens=app.config["OPENAI_CHAT_MAX_TOKENS"],
+        generation_length_tokens=app.config["OPENAI_CHAT_GENERATION_LENGTH"],
     )
 
     openai_chat_model = OpenAIChatModel(openai_chat_config)
