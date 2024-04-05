@@ -32,9 +32,11 @@ class OpenAIChatModel:
             api_key=os.getenv("OPENAI_API_KEY"),
             organization=os.getenv("OPENAI_ORGANIZATION"),
         )
+        
         self.chat_model_name = config.chat_model
         self.text_encoder = tiktoken.encoding_for_model(self.chat_model_name)
         self.max_tokens = config.max_tokens
+        self.generation_length_tokens = config.generation_length_tokens
 
     def generate(self, text: str) -> str:
         """Simple wrapper around the ChatCompletion API.

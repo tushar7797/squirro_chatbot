@@ -43,18 +43,19 @@ es = _init_elasticsearch()
 
 
 def __init_openai_chatbot():
-
     openai_chat_config = OpenAIChatModelConfig(
-        chat_model=app_config["chat_model"],
-        max_tokens=app_config["max_tokens"],
-        generation_length_tokens=app_config["generation_length_tokens"],
+        chat_model=app.config["CHAT_MODEL"],
+        max_tokens=app.config["MAX_TOKENS"],
+        generation_length_tokens=app.config["GENERATION_LENGTH"]
     )
 
     openai_chat_model = OpenAIChatModel(openai_chat_config)
 
     return openai_chat_model
 
+
 openai_chat_model = __init_openai_chatbot()
+
 
 @app.route("/documents/", methods=["POST"])
 def create_document():
@@ -94,6 +95,25 @@ def get_document(doc_id):
         return jsonify(error="Document not found"), 404
 
 
+def _retrieve_top_k_docs(query: str, top_k: int) -> str:
+    """ """
+
+    res = es.search(
+        index=app.config["INDEX_NAME"],
+        body={"query": {"match": {"text": query}}},
+        size=top_k,
+    )
+    results = [
+        SearchResult(
+            document=Document(text=hit["_source"]["text"], id=hit["_id"]),
+            score=hit["_score"],
+        )
+        for hit in res["hits"]["hits"]
+    ]
+
+    return results
+
+
 @app.route("/search/", methods=["GET"])
 def search_documents():
     """Returns the top k corresponding documents for a given query.
@@ -105,21 +125,25 @@ def search_documents():
 
     query = request.args.get("query", "")
     top_k = int(request.args.get("top_k", app.config["DEFAULT_TOP_K"]))
-    res = es.search(
-        index=app.config["INDEX_NAME"],
-        body={"query": {"match": {"text": query}}},
-        size=top_k,
-    )
-    results = [
-        SearchResult(
-            document=Document(text=hit["_source"]["text"], id=hit["_id"]),
-            score=hit["_score"],
-        ).model_dump()
-        for hit in res["hits"]["hits"]
-    ]
+    results = _retrieve_top_k_docs(query=query, top_k=top_k)
+    results = [result.model_dump() for result in results]
 
     return jsonify(results=results)
 
+
+@app.route("/generate_answer/", methods=["GET"])
+def generate_answer():
+
+    query = request.args.get("query", "")
+    top_k = app.config["DEFAULT_TOP_K"]
+
+    relevant_docs = _retrieve_top_k_docs(query=query, top_k=top_k)
+    prompt_context = " ".join([doc.document.text for doc in relevant_docs])
+
+    prompt = f"Please Answer the query using the context provided. Query: {query}\nContext: {prompt_context}"
+    answer = openai_chat_model.generate(prompt)
+
+    return jsonify(answer = answer)
 
 if __name__ == "__main__":
     app.run(debug=True)
