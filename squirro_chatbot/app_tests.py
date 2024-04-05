@@ -7,7 +7,7 @@ from absl.testing import absltest
 from flask import Flask
 
 from squirro_chatbot.app import _retrieve_top_k_docs, app
-from squirro_chatbot.search_result import Document, SearchResult
+from squirro_chatbot.dataclasses.search_result import Document, SearchResult
 
 
 class TestFlaskApp(absltest.TestCase):

@@ -22,7 +22,7 @@ from squirro_chatbot.models.openai_chat_model import (
     OpenAIChatModel,
     OpenAIChatModelConfig,
 )
-from squirro_chatbot.search_result import Document, SearchResult
+from squirro_chatbot.dataclasses.search_result import Document, SearchResult
 
 # Initialize Flask app and apply configurations
 app = Flask(__name__)
