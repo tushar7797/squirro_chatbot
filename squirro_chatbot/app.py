@@ -1,4 +1,14 @@
-"""Flask application for creating and searching an ElasticSearch based Index."""
+"""Flask application for creating and searching an ElasticSearch based Index.
+
+The App has the following functions/endpoints:
+
+    create_document: Creates a document and returns the document id.
+    get_document: Retrieves the document given the document id.
+    search_documents: Retrieves the top k documents for a given query.
+    generate_answer: Generates an answer given the search query by 
+        retrieving the most relevant documents and using OpenAIChatModel.
+"""
+
 import hashlib
 import os
 from uuid import uuid4
@@ -19,37 +29,36 @@ app = Flask(__name__)
 app.config.from_object("app_config")
 CORS(app)
 
+# Both are initialized with initialize_app
+elastic_search_client = None
+openai_chat_model = None
 
-def _init_elasticsearch():
-    """Initialize Python Elastic Search client."""
 
+def initialize_app():
+    """Initialises all the essentials for the app.
+
+    Initializes the elastic search client and openai_chat_model
+    according to provided configs.
+    """
+    global elastic_search_client
+    global openai_chat_model
+
+    # Initialize elastic search client.
     es_username = os.getenv("ELASTICSEARCH_USERNAME", "elastic")
     es_password = os.getenv("ELASTICSEARCH_PASSWORD")
 
     # verify_certs set to False for this toy project.
-    es = Elasticsearch(
+    elastic_search_client = Elasticsearch(
         [app.config["ELASTICSEARCH_URL"]],
         http_auth=(es_username, es_password),
         use_ssl=True,
         verify_certs=False,
     )
 
-    if not es.indices.exists(app.config["INDEX_NAME"]):
-        es.indices.create(app.config["INDEX_NAME"])
+    if not elastic_search_client.indices.exists(app.config["INDEX_NAME"]):
+        elastic_search_client.indices.create(app.config["INDEX_NAME"])
 
-    return es
-
-
-# Initialize the elastic search client.
-es = _init_elasticsearch()
-
-
-def __init_openai_chatbot() -> OpenAIChatModel:
-    """Initializes and returns an OpenAI Chat Model
-
-    Returns
-        openai_chat_model: Instance of OpenAI Chat model
-    """
+    # Initialize the Open AI Chat Model.
     openai_chat_config = OpenAIChatModelConfig(
         chat_model=app.config["CHAT_MODEL"],
         max_tokens=app.config["MAX_TOKENS"],
@@ -57,11 +66,6 @@ def __init_openai_chatbot() -> OpenAIChatModel:
     )
 
     openai_chat_model = OpenAIChatModel(openai_chat_config)
-
-    return openai_chat_model
-
-
-openai_chat_model = __init_openai_chatbot()
 
 
 @app.route("/documents/", methods=["POST"])
@@ -81,24 +85,26 @@ def create_document():
     document_text = request.json["text"]
     doc_id = hashlib.sha256(document_text.encode("utf-8")).hexdigest()
 
-    es.index(index=app.config["INDEX_NAME"], id=doc_id, body={"text": document_text})
+    elastic_search_client.index(
+        index=app.config["INDEX_NAME"], id=doc_id, body={"text": document_text}
+    )
 
     return jsonify(document_id=doc_id)
 
 
 @app.route("/documents/<doc_id>", methods=["GET"])
-def get_document(doc_id):
+def get_document(doc_id: str):
     """Retrieves the document corresponding to the given doc id.
 
     Args:
-        doc_id (str): Document ID
+        doc_id: Document ID
 
     Returns:
         A JSON response containing the `text` of the document if found,
         otherwise an error message and a 404 status code.
     """
 
-    res = es.get(index=app.config["INDEX_NAME"], id=doc_id)
+    res = elastic_search_client.get(index=app.config["INDEX_NAME"], id=doc_id)
 
     if res["found"]:
         return jsonify(text=res["_source"]["text"])
@@ -108,7 +114,7 @@ def get_document(doc_id):
 
 def _retrieve_top_k_docs(query: str, top_k: int) -> list[SearchResult]:
     """Retrieves the top k relevant documents for query.
-    
+
     Args:
         query: Query to be searched
         top_k: Number of documents to be retrieved
@@ -116,9 +122,9 @@ def _retrieve_top_k_docs(query: str, top_k: int) -> list[SearchResult]:
     Returns:
         results: List of Most relevant docs.
     """
-    
+
     # Match the document with the query
-    res = es.search(
+    res = elastic_search_client.search(
         index=app.config["INDEX_NAME"],
         body={"query": {"match": {"text": query}}},
         size=top_k,
@@ -158,7 +164,7 @@ def search_documents():
 @app.route("/generate_answer/", methods=["GET"])
 def generate_answer():
     """Generate Open AI Chat model response to query.
-    
+
     Returns:
         JSON Response with generated answer and retrieved
             document ids.
@@ -178,4 +184,5 @@ def generate_answer():
 
 
 if __name__ == "__main__":
+    initialize_app()
     app.run(debug=True)
