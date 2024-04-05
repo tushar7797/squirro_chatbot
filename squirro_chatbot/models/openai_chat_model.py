@@ -1,3 +1,4 @@
+"""Wrapper around OpenAI's Chat completion API"""
 import logging
 import os
 import time
@@ -71,16 +72,8 @@ class OpenAIChatModel:
             frequency_penalty=0.0,
             presence_penalty=0.0,
         )
-        output_num_tokens = self.text_encoder.encode(
-            chat_completion.choices[0].message.content.strip()
-        )
         generate_end = time.time()
 
-        num_tokens_generated = len(output_num_tokens)
-
-        logging.info(
-            "OpenAI LLM generate output token count %s", len(output_num_tokens)
-        )
         logging.info(
             "Total time taken is: %s", int((generate_end - generate_begin) / 60)
         )

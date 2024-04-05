@@ -33,6 +33,7 @@ class TestFlaskApp(absltest.TestCase):
     @patch("squirro_chatbot.app.es")
     def test_get_document_found(self, mock_es):
         """Test retrieving a document that exists."""
+        # Mock the return value for elasticsearch.get
         mock_es.get.return_value = {"found": True, "_source": {"text": "Document text"}}
         response = self.app.get("/documents/some_document_id")
         self.assertEqual(response.status_code, 200)
@@ -42,6 +43,7 @@ class TestFlaskApp(absltest.TestCase):
     @patch("squirro_chatbot.app.es")
     def test_get_document_not_found(self, mock_es):
         """Test retrieving a document that does not exist."""
+        # Mock the return value for elasticsearch.get
         mock_es.get.return_value = {"found": False}
         response = self.app.get("/documents/nonexistent_document_id")
         expected_response = {"error": "Document not found"}
@@ -51,7 +53,8 @@ class TestFlaskApp(absltest.TestCase):
     @patch("squirro_chatbot.app.es")
     @patch("squirro_chatbot.app._retrieve_top_k_docs")
     def test_search_documents(self, mock_retrieve_top_k_docs, mock_es):
-        """Test the search functionality."""
+        """Test the search documents functionality."""
+        # Mock the retrieved documents.
         mock_retrieve_top_k_docs.return_value = [
             SearchResult(document=Document(text="Document 1 text", id="1"), score=0.9),
             SearchResult(document=Document(text="Document 2 text", id="2"), score=0.8),
@@ -72,11 +75,13 @@ class TestFlaskApp(absltest.TestCase):
     @patch("squirro_chatbot.app._retrieve_top_k_docs")
     def test_generate_answer(self, mock_retrieve_top_k_docs, mock_openai_chat_model):
         """Test generating an answer using the OpenAI Chat model."""
+        # Mock the retrieved documents.
         mock_retrieve_top_k_docs.return_value = [
             SearchResult(document=Document(text="Document 1 text", id="1"), score=0.9),
             SearchResult(document=Document(text="Document 2 text", id="2"), score=0.8),
             SearchResult(document=Document(text="Document 3 text", id="3"), score=0.7),
         ]
+        # Mock the open ai client.
         mock_openai_chat_model.generate.return_value = "Generated answer"
         response = self.app.get("/generate_answer/?query=test")
         self.assertEqual(response.status_code, 200)
