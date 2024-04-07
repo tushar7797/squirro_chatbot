@@ -81,6 +81,14 @@ The application provides the following endpoints:
 curl http://127.0.0.1:5000/documents/c41cbbf2c21619e1d51dd729dbd9dd73693672ac0e358bfcda467827ba41bdf7
   ```
 
+  ### Searching for Documents
+
+**GET /search/**: Search documents based on a query.
+
+  ```sh
+curl "http://127.0.0.1:5000/search/?query=test%20document&top_k=2"
+  ```
+
 ### Generating Answers
 
 **GET /generate_answer/**: Generate an answer to a query using the most relevant documents. This endpoint uses the same query parameters as the search endpoint.
@@ -89,13 +97,8 @@ curl http://127.0.0.1:5000/documents/c41cbbf2c21619e1d51dd729dbd9dd73693672ac0e3
   curl "http://127.0.0.1:5000/generate_answer/?query=test%20document"
   ```
 
-  ### Searching for Documents
 
-**GET /search/**: Search documents based on a query.
-
-  ```sh
-curl "http://127.0.0.1:5000/search/?query=test%20document&top_k=2"
-  ```
+  
 
 
 ## Command to Create a document
