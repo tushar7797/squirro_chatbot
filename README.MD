@@ -34,7 +34,7 @@ Before you begin, ensure you have the following installed:
     ```sh
    pip install -e .
    ```
-    We strongly suggest using a conda environment and then installing the repository.
+    We strongly suggest creating a conda environment and then installing the repository.
 
 3. Setup Environment Variables
 
@@ -51,7 +51,53 @@ Before you begin, ensure you have the following installed:
     ```sh
     python3 app.py
     ```
-    
+
+## Usage
+
+The application provides the following endpoints:
+
+### Creating Documents
+
+**POST /documents/**: Submit a document for indexing.
+
+  ```sh
+  curl -X POST http://127.0.0.1:5000/documents/ -H "Content-Type: application/json" -d '{"text": "This is a test document"}'
+  ```
+
+
+### Creating Documents
+
+**POST /documents/**: Submit a document for indexing.
+
+  ```sh
+  curl -X POST http://127.0.0.1:5000/documents/ -H "Content-Type: application/json" -d '{"text": "This is a test document"}'
+  ```
+
+  ### Retrieving Documents
+
+**GET /documents/<doc_id>/**: Retrieve a document by its ID.
+
+  ```sh
+curl http://127.0.0.1:5000/documents/c41cbbf2c21619e1d51dd729dbd9dd73693672ac0e358bfcda467827ba41bdf7
+  ```
+
+### Generating Answers
+
+**GET /generate_answer/**: Generate an answer to a query using the most relevant documents. This endpoint uses the same query parameters as the search endpoint.
+
+  ```sh
+  curl "http://127.0.0.1:5000/generate_answer/?query=test%20document"
+  ```
+
+  ### Searching for Documents
+
+**GET /search/**: Search documents based on a query.
+
+  ```sh
+curl "http://127.0.0.1:5000/search/?query=test%20document&top_k=2"
+  ```
+
+
 ## Command to Create a document
 
 curl -X POST http://127.0.0.1:5000/documents/ -H "Content-Type: application/json" -d '{"text": "This is a test document"}' 
