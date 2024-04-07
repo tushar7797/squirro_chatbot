@@ -1,6 +1,6 @@
 # Squirro Chatbot
 
-Squirro Chatbot is a powerful Python Flask-based application that leverages ElasticSearch and OpenAI's GPT-based models to provide an intelligent document retrieval and question-answering system. Users can submit documents, which are indexed and searchable, allowing the chatbot to retrieve relevant documents and generate answers to user queries based on the information contained within those documents.
+Squirro Chatbot is a Python Flask-based application that leverages ElasticSearch and OpenAI's GPT-based models to provide an intelligent document retrieval and question-answering system. Users can submit documents, which are indexed and searchable, allowing the chatbot to retrieve relevant documents and generate answers to user queries based on the information contained within those documents.
 
 ## Features
 
@@ -97,9 +97,9 @@ curl "http://127.0.0.1:5000/search/?query=test%20document&top_k=2"
   curl "http://127.0.0.1:5000/generate_answer/?query=test%20document"
   ```
 
+## Relevance Tuning with FIQA
 
-  
-
+We also provide some experiments that we conducted on Relevance Tuning with the [Financial Opinion Mining and Question Answering](https://sites.google.com/view/fiqa/home). These experiments can be found in fiqa_notebooks. We also explain all the experiments and the results in the documentation.
 
 ## Command to Create a document
 
