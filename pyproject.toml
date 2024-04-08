@@ -14,5 +14,9 @@ keywords = ["chatbot", "elasticsearch", "flask"]
 
 dependencies = [
     "flask>=1.1.2",
-    "elasticsearch>=7.0.0",
+    "elasticsearch=7.13.3",
+    "pydantic>=2.0.0",
+    "flask_cors",
+    "openai",
+    "tiktoken"
 ]
