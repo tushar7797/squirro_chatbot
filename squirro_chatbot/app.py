@@ -23,6 +23,7 @@ from squirro_chatbot.models.openai_chat_model import (
     OpenAIChatModelConfig,
 )
 from squirro_chatbot.dataclasses.search_result import Document, SearchResult
+from squirro_chatbot.elastic_search_configs import elastic_search_config
 
 # Initialize Flask app and apply configurations
 app = Flask(__name__)
@@ -56,7 +57,9 @@ def initialize_app():
     )
 
     if not elastic_search_client.indices.exists(app.config["INDEX_NAME"]):
-        elastic_search_client.indices.create(app.config["INDEX_NAME"])
+        elastic_search_client.indices.create(
+            app.config["INDEX_NAME"], body=elastic_search_config
+        )
 
     # Initialize the Open AI Chat Model.
     openai_chat_config = OpenAIChatModelConfig(

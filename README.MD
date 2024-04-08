@@ -16,9 +16,8 @@ These instructions will guide you through the setup and deployment of Squirro Ch
 
 Before you begin, ensure you have the following installed:
 - Python 3.8 or higher
-- Flask
-- Elasticsearch
-- An OpenAI API key
+- Elasticsearch: The user needs to setup and start an Elastic Search Server. [Setup Link](https://www.elastic.co/downloads/elasticsearch) 
+- OpenAI API Access: Open AI API Access is required only for generating an answer to queries. Search functionality works without the OpenAI API. [Link](https://openai.com/blog/openai-api)
 
 ### Installation
 
@@ -46,7 +45,9 @@ Before you begin, ensure you have the following installed:
     export OPENAI_ORGANIZATION='your_openai_organization'
     ```
 
-4. Running the Application
+4. Update App configurations accordingly in ```squirro_chatbot/app_config.py```
+
+5. Running the Application
 
     ```sh
     python3 app.py
