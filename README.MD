@@ -1,5 +1,7 @@
 # Squirro Chatbot
 
+[Detailed Documentation Link](https://docs.google.com/document/d/1Q5KtNZrrqpJIt-NZx7JRqYFKYO027fVnVuEMmTXUa-4/edit?usp=sharing)
+
 Squirro Chatbot is a Python Flask-based application that leverages ElasticSearch and OpenAI's GPT-based models to provide an intelligent document retrieval and question-answering system. Users can submit documents, which are indexed and searchable, allowing the chatbot to retrieve relevant documents and generate answers to user queries based on the information contained within those documents.
 
 ## Features
