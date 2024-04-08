@@ -1,3 +1,5 @@
+"""Default Config for the elastic search python client."""
+
 config = {
     "settings": {
         "index": {"number_of_shards": 1, "number_of_replicas": 0},
