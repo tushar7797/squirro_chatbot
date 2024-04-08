@@ -26,7 +26,7 @@ Before you begin, ensure you have the following installed:
 1. **Clone the Repository**
 
    ```sh
-   git clone https://yourrepository/squirro_chatbot.git
+   git clone https://github.com/tushar7797/squirro_chatbot.git
    cd squirro_chatbot
    ```
 
@@ -58,15 +58,6 @@ Before you begin, ensure you have the following installed:
 ## Usage
 
 The application provides the following endpoints:
-
-### Creating Documents
-
-**POST /documents/**: Submit a document for indexing.
-
-  ```sh
-  curl -X POST http://127.0.0.1:5000/documents/ -H "Content-Type: application/json" -d '{"text": "This is a test document"}'
-  ```
-
 
 ### Creating Documents
 
