@@ -100,3 +100,11 @@ curl "http://127.0.0.1:5000/search/?query=test%20document&top_k=2"
 ## Relevance Tuning with FIQA
 
 We also provide some experiments that we conducted on Relevance Tuning with the [Financial Opinion Mining and Question Answering](https://sites.google.com/view/fiqa/home) dataset. These experiments can be found in fiqa_notebooks. We also explain all the experiments and the results in the documentation.
+
+## Run the Tests
+
+The tests for relevant functionalities are provided in the files "squirro_chatbot/app_test.py" and "squirro_chatbot/models/openai_chat_model_test.py". One can either run the tests by running each of these with python3 or install pytest and run 
+
+  ```python
+   python3 -m pytest . 
+  ```
